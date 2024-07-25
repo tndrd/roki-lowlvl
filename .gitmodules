@@ -1,0 +1,7 @@
+[submodule "Deps/roki-mb-daemon"]
+	path = Deps/roki-mb-daemon
+	url = https://github.com/tndrd/roki-mb-daemon.git
+[submodule "Deps/roki-mb-interface"]
+	path = Deps/roki-mb-interface
+	url = https://github.com/tndrd/roki-mb-interface.git
+	branch = develop
