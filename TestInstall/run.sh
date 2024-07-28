@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Verifying installation..."
+echo "\nVerifying installation...\n"
 
 mkdir -p build/
 rm -rf build/*
@@ -15,15 +15,15 @@ echo "Building against CXX library..."
 cmake --build .
 ./TestInstall
 
+cd ..
+
 echo "Testing python module..."
 python3 TestInstall.py
 
-cd ..
-
 echo "Testing mbctl..."
-mbctl > /dev/null
+mbctl help > /dev/null
 
 echo "Testing mbwtf..."
 mbwtf dontrun > /dev/null
 
-echo "Installation verified successfully"
+echo "\nInstallation verified successfully\n"

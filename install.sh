@@ -1,30 +1,30 @@
 #!/bin/bash
 set -e
 
-echo "roki-lowlvl: Libraries for communication with Roki's hardware"
+echo "\nroki-lowlvl: Libraries for communication with Roki's hardware"
 echo "Author: Lekhterev V.V. @tndrd, Starkit 2024"
 
-echo "Installing dependencies..."
+echo "\nInstalling dependencies...\n"
 
 sudo apt install git
 sudo apt install cmake
 sudo apt install python3 python3-dev python3-distutils
 
-echo "Updating submodules..."
+echo "\nUpdating submodules...\n"
 git submodule update --init --remote --recursive
 
-echo "Building project..."
+echo "\nBuilding project...\n"
 mkdir -p build
 cd build
 
 cmake ..
 cmake --build .
 
-echo "Installing..."
+echo "\nInstalling...\n"
 
 cmake --install .
 
-cd TestInstall
+cd ../TestInstall
 sh run.sh
 
 cd ..
