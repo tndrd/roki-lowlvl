@@ -48,8 +48,8 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
       .def_readwrite("capacity", &MI::BodyQueueInfo::Capacity);
 
   py::enum_<MI::TTYConfig::StopbitsCount>(m, "Stopbits", py::arithmetic())
-      .value("one", MI::TTYConfig::StopbitsCount::One)
-      .value("two", MI::TTYConfig::StopbitsCount::Two);
+      .value("One", MI::TTYConfig::StopbitsCount::One)
+      .value("Two", MI::TTYConfig::StopbitsCount::Two);
 
   py::class_<MI::TTYConfig>(m, "TTYConfig")
       .def(py::init<>())
