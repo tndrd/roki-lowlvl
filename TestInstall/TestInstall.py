@@ -1,78 +1,77 @@
-import Roki
-import RokiPyTest as rpt
+import rokilowlvlpy as roki
 
-frame = Roki.IMUFrame()
+frame = roki.IMUFrame()
 
-_ = frame.Orientation.X
-_ = frame.Orientation.Y
-_ = frame.Orientation.Z
-_ = frame.Orientation.W
+_ = frame.orientation.x
+_ = frame.orientation.y
+_ = frame.orientation.z
+_ = frame.orientation.w
 
-_ = frame.Timestamp.TimeS
-_ = frame.Timestamp.TimeNS
-_ = frame.SensorID
+_ = frame.timestamp.time_s
+_ = frame.timestamp.time_ns
+_ = frame.sensor_id
 
-info = Roki.FrameContainerInfo()
-_ = info.First
-_ = info.NumAv
-_ = info.MaxFrames
+info = roki.FrameContainerInfo()
+_ = info.first
+_ = info.num_av
+_ = info.max_frames
 
-info = Roki.BodyQueueInfo()
-_ = info.Size
-_ = info.Capacity
+info = roki.BodyQueueInfo()
+_ = info.size
+_ = info.capacity
 
-_ = Roki.Stopbits.One
-_ = Roki.Stopbits.Two
+_ = roki.Stopbits.One
+_ = roki.Stopbits.Two
 
-conf = Roki.TTYConfig()
-_ = conf.Port
-_ = conf.Baudrate
-_ = conf.Stopbits
-_ = conf.ParityBit
-_ = conf.Timeout
+conf = roki.TTYConfig()
+_ = conf.port
+_ = conf.baudrate
+_ = conf.stopbits
+_ = conf.parity_bit
+_ = conf.timeout
 
+mb = roki.Motherboard()
 
-mb = Roki.Motherboard()
+mb.configure(conf)
+mb.get_imu_frame(0)
+mb.get_body_frame(0)
+mb.get_imu_container_info()
+mb.get_body_container_info()
+mb.reset_strobe_containers()
+mb.set_imu_strobe_offset(0)
+mb.set_body_strobe_offset(0)
+mb.get_imu_latest()
+mb.get_strobe_width()
+mb.configure_strobe_filter(0,0)
+mb.get_body_queue_info()
+mb.set_body_queue_period(0)
+mb.is_ok()
+mb.get_error()
+mb.reset_body_queue()
 
-mb.Configure(conf)
-mb.GetIMUFrame(0)
-mb.GetBodyFrame(0)
-mb.GetIMUContainerInfo()
-mb.GetBodyContainerInfo()
-mb.ResetStrobeContainers()
-mb.SetIMUStrobeOffset(0)
-mb.SetBodyStrobeOffset(0)
-mb.GetIMULatest()
-mb.GetStrobeWidth()
-mb.ConfigureStrobeFilter(0,0)
-mb.GetBodyQueueInfo()
-mb.SetBodyQueuePeriod(0)
-mb.IsOk()
-mb.GetError()
-mb.ResetBodyQueue()
+sd = roki.protocols.Rcb4.ServoData()
+_ = sd.id
+_ = sd.sio
+_ = sd.data
 
-Roki.MbDefaultConfig(mb)
+rcb = roki.protocols.Rcb4(mb)
+rcb.check_acknowledge()
+rcb.set_servo_pos([], 0)
 
-sd = Roki.Rcb4.ServoData()
-_ = sd.Id
-_ = sd.Sio
-_ = sd.Data
+rcb.set_servo_pos_async([], 0)
+rcb.set_servo_pos_async([], 0, 42)
+rcb.read_addr(0x0060, 8)
+rcb.motion_play(0)
+rcb.get_error()
+rcb.is_ok()
 
-rcb = Roki.Rcb4(mb)
-rcb.checkAcknowledge()
-rcb.setServoPos([], 0)
+zubr = roki.protocols.Zubr(mb)
+zubr.mem_i_set(0, 0)
+zubr.mem_f_set(0, 0)
+zubr.mem_i_get(0)
+zubr.mem_f_get(0)
 
-rcb.setServoPosAsync([], 0)
-rcb.setServoPosAsync([], 0, 42)
-rcb.moveRamToComCmdSynchronize(0x0060, 8)
-rcb.motionPlay(0)
-rcb.GetError()
-rcb.IsOk()
-
-zubr = Roki.Zubr(mb)
-zubr.memISet(0, 0)
-zubr.memFSet(0, 0)
-zubr.memIGet(0)
-zubr.memFGet(0)
-
-rpt.end_test()
+try:
+    mb = roki.create_motherboard()
+except NameError: raise
+except Exception: pass
