@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 
-include(config)
+include(Misc/config)
 
 set(MODULE_NAME "rokilowlvl")
 
@@ -145,8 +145,6 @@ target_link_libraries(rokilowlvl-export PUBLIC MotherboardAdapter ZubrAdapter Ro
 #  )
 
 bundle_static_library(rokilowlvl-export rokilowlvl)
-
-file(GENERATE OUTPUT logs.cmake CONTENT $<TARGET_PROPERTY:rokilowlvl,INCLUDE_DIRECTORIES>)
 
 install(TARGETS rokilowlvl
         EXPORT  ${PROJECT_NAME}
