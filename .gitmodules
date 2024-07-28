@@ -5,6 +5,3 @@
 	path = Deps/roki-mb-interface
 	url = https://github.com/tndrd/roki-mb-interface.git
 	branch = develop
-[submodule "Deps/pybind11"]
-	path = Deps/pybind11
-	url = https://github.com/pybind/pybind11.git
