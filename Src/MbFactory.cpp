@@ -71,8 +71,6 @@ std::string MbFactory::GetPortFromDaemon(const std::string &username) {
 }
 
 void MbFactory::FreePort() {
-  std::cout << "FreePort called" << std::endl;
-
   MbDaemon::DaemonTools daemon{};
 
   using Client = MbDaemon::Client;
