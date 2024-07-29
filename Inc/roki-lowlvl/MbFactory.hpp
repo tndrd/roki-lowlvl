@@ -1,3 +1,5 @@
+#pragma once
+
 #include "roki-lowlvl/Aliases.hpp"
 #include "roki-mb-daemon/DaemonTools.hpp"
 #include "roki-mb-daemon/Helpers.hpp"

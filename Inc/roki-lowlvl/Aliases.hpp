@@ -1,3 +1,5 @@
+#pragma once
+
 #include "roki-mb-interface/MbAliases.hpp"
 #include "roki-mb-interface/MotherboardAdapter.hpp"
 
