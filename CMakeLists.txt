@@ -25,12 +25,16 @@ PROPAGATE_VAR(SERIAL_PARITY_ENV)
 PROPAGATE_VAR(SERIAL_TIMEOUT_ENV)
 PROPAGATE_VAR(PYTHON_MODULE_NAME)
 
+set(DIAG_SCRIPTS_DIR /usr/lib/${MODULE_NAME}/diagnostic/Scripts)
+add_compile_definitions(DIAG_SCRIPTS_DIR=${DIAG_SCRIPTS_DIR})
+
 # Required to build shared python library
 add_compile_options(-fPIC)
 
 project(roki-lowlvl)
 
 add_subdirectory(Deps/pybind11)
+add_subdirectory(Deps/googletest)
 add_subdirectory(Deps/roki-mb-daemon)
 add_subdirectory(Deps/roki-mb-interface)
 
@@ -43,9 +47,14 @@ target_link_libraries(MbFactory PUBLIC MotherboardAdapter DaemonTools CheckDefs1
 target_include_directories(MbFactory PUBLIC Inc/)
 
 # Tests
-add_executable(${TEST_EXECUTABLE} Src/Test.cpp)
-target_link_libraries(${TEST_EXECUTABLE} PUBLIC MbFactory)
+add_executable(${TEST_EXECUTABLE} Src/MbDiagEntry.cpp)
+target_link_libraries(${TEST_EXECUTABLE} PUBLIC MbFactory ZubrAdapter RokiRcb4Adapter GTest::gtest_main)
+if(DEFINED ENV{ROKI_USE_HARDWARE_MOCKS})
+    target_compile_definitions(${TEST_EXECUTABLE} PRIVATE USE_MOCKS)
+endif()
+
 install(TARGETS ${TEST_EXECUTABLE} RUNTIME DESTINATION /usr/bin/)
+install(DIRECTORY Scripts/Diagnostic/ DESTINATION ${DIAG_SCRIPTS_DIR})
 
 # Bindings
 pybind11_add_module(${PYTHON_MODULE_NAME} Src/PyBinding.cpp)
@@ -138,11 +147,6 @@ endfunction()
 
 add_library(rokilowlvl-export STATIC Src/CheckDefs.cpp)
 target_link_libraries(rokilowlvl-export PUBLIC MotherboardAdapter ZubrAdapter RokiRcb4Adapter DaemonTools CLI)
-#target_include_directories(rokilowlvl-export PUBLIC 
-#  $<TARGET_PROPERTY:MotherboardAdapter,INCLUDE_DIRECTORIES>
-#  $<TARGET_PROPERTY:RokiRcb4Adapter,INCLUDE_DIRECTORIES>
-#  $<TARGET_PROPERTY:CLI,INCLUDE_DIRECTORIES>
-#  )
 
 bundle_static_library(rokilowlvl-export rokilowlvl)
 
