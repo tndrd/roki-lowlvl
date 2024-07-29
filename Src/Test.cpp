@@ -6,7 +6,7 @@ using namespace std::string_literals;
 
 #define DONTRUN_CMD "dontrun"s
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) try {
     if (argc == 2 && DONTRUN_CMD == argv[1]) {
         return 0;
     }
@@ -19,4 +19,8 @@ int main(int argc, char* argv[]) {
     auto mb = LowLvl::MbFactory::Create("Vova");
     sleep(10);
     return 0;
+} catch(std::exception& e) {
+    std::cout << "Caught exception: " << e.what() << std::endl;
+} catch(...) {
+    std::cout << "Unknown exception" << std::endl;
 }
