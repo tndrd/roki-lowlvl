@@ -64,10 +64,10 @@ std::string MbFactory::GetPortFromDaemon(const std::string &username) {
   request.Name.Size = username.size();
   request.PID = getpid();
 
-  auto responce = client.Call<Proc>(request);
+  std::string responce = client.Call<Proc>(request).ToCxxStr();
   client.SoftDisconnect();
 
-  return responce.ToCxxStr();
+  return responce;
 }
 
 void MbFactory::FreePort() {
