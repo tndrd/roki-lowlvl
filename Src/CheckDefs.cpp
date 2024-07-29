@@ -18,6 +18,10 @@
 #error PYTHON_MODULE_NAME is not defined
 #endif
 
+#ifndef DIAG_SCRIPTS_DIR
+#error DIAG_SCRIPTS_DIR is not defined
+#endif
+
 #define str(a) #a
 #define xstr(a) str(a)
 
@@ -26,3 +30,4 @@
 #pragma message "SERIAL_PARITY_ENV = " xstr(SERIAL_PARITY_ENV)
 #pragma message "SERIAL_TIMEOUT_ENV = " xstr(SERIAL_TIMEOUT_ENV)
 #pragma message "PYTHON_MODULE_NAME = " xstr(PYTHON_MODULE_NAME)
+#pragma message "DIAG_SCRIPTS_DIR = " xstr(DIAG_SCRIPTS_DIR)
