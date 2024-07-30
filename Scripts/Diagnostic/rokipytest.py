@@ -45,6 +45,6 @@ def call(mb, val):
         val = val[0]
     
     if val == False:
-        failure_stop(mb.GetError())
+        failure_stop(mb.get_error())
 
     return ret

@@ -22,7 +22,7 @@ for i in range(0, (1000 * TESTING_TIME_S) // UPDATE_PERIOD_MS):
     result, data = rcb.read_addr(0x0060, 8)
 
     if not result:
-        rpt.failure_stop(f"Failed to obtain Body IMU data: {rcb.GetError()}")
+        rpt.failure_stop(f"Failed to obtain Body IMU data: {rcb.get_error()}")
 
     try: quat = struct.unpack("<hhhh", bytes(data))
     except Exception: rpt.failure_stop(f"Failed to unpack bytes: {bytes(data)}")

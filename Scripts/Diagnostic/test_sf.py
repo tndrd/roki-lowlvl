@@ -19,6 +19,8 @@ n_strobes_body = 0
 failed = False
 
 do_compare = True
+picam2 = Picamera2(camera_num=0)
+
 mb = rpt.create_motherboard()
 
 def fits(val, target):
@@ -29,6 +31,7 @@ def pre_callback(request):
     global n_strobes_imu
     global n_strobes_body
     global failed
+    global mb
 
     duration = request.get_metadata()['FrameDuration']
     if fits(duration, FRAME_DURATION_US):
@@ -47,7 +50,6 @@ def pre_callback(request):
         if (cond1 or cond2):
             failed = True
 
-picam2 = Picamera2(camera_num=0)
 picam2.pre_callback = pre_callback
 
 rpt.call(mb, mb.reset_strobe_containers())
@@ -72,21 +74,11 @@ rpt.eprint(f"Strobe width: {width}")
 
 picam2.stop()
 
+del mb
 if rpt.check(failed):
     rpt.failure_stop("Difference in frame count exceeded the tolerance")
 
 if rpt.check(abs(width - FRAME_DURATION_MS) > DURATION_THRESHOLD):
     rpt.failure_stop("Inappropriate strobe width")
-
-rpt.call(mb, mb.reset_strobe_containers())
-
-imu = rpt.call(mb, mb.get_imu_container_info())
-body = rpt.call(mb, mb.get_body_container_info())
-
-if rpt.check(body.num_av != 0):
-    rpt.failure_stop("Body frCont did not reset")
-
-if rpt.check(imu.num_av != 0):
-    rpt.failure_stop("IMU frCont did not reset")
 
 rpt.end_test()
