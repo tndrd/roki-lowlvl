@@ -2,7 +2,7 @@
 set -e
 
 echo "\nroki-lowlvl: Libraries for communication with Roki's hardware"
-echo "Author: Lekhterev V.V. @tndrd, Starkit 2024"
+echo "Author:      Lekhterev V.V. @tndrd, Starkit 2024"
 
 echo "\nInstalling dependencies...\n"
 
