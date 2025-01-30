@@ -23,7 +23,7 @@ python3 TestInstall.py
 echo "Testing mbctl..."
 mbctl help > /dev/null
 
-echo "Testing mbwtf..."
-mbwtf dontrun > /dev/null
+echo "Testing mbdiag..."
+mbdiag dummy > /dev/null
 
 echo "\nInstallation verified successfully\n"
