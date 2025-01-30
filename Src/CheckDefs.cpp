@@ -22,6 +22,10 @@
 #error DIAG_SCRIPTS_DIR is not defined
 #endif
 
+#ifndef DIAG_SUITES_DIR
+#error DIAG_SCRIPTS_DIR is not defined
+#endif
+
 #define str(a) #a
 #define xstr(a) str(a)
 

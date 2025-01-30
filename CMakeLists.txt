@@ -28,8 +28,11 @@ PROPAGATE_VAR(PYTHON_MODULE_NAME)
 set(DIAG_SCRIPTS_DIR /usr/lib/${MODULE_NAME}/diagnostic/Scripts)
 add_compile_definitions(DIAG_SCRIPTS_DIR=${DIAG_SCRIPTS_DIR})
 
+set(DIAG_SUITES_DIR /usr/lib/${MODULE_NAME}/diagnostic/Suites)
+add_compile_definitions(DIAG_SUITES_DIR=${DIAG_SUITES_DIR})
+
 # Required to build shared python library
-add_compile_options(-fPIC)
+add_compile_options(-fPIC -g)
 
 project(roki-lowlvl)
 
@@ -54,7 +57,8 @@ if(DEFINED ENV{ROKI_USE_HARDWARE_MOCKS})
 endif()
 
 install(TARGETS ${TEST_EXECUTABLE} RUNTIME DESTINATION /usr/bin/)
-install(DIRECTORY Scripts/Diagnostic/ DESTINATION ${DIAG_SCRIPTS_DIR})
+install(DIRECTORY Diagnostic/Scripts/ DESTINATION ${DIAG_SCRIPTS_DIR})
+install(DIRECTORY Diagnostic/Suites/ DESTINATION ${DIAG_SUITES_DIR})
 
 # Bindings
 pybind11_add_module(${PYTHON_MODULE_NAME} Src/PyBinding.cpp)
