@@ -1,13 +1,17 @@
 #include "rcb4-base-class/Rcb4BaseClass.hpp"
 #include "roki-lowlvl/MbFactory.hpp"
 #include "roki-mb-interface/Protocols/RokiRcb4.hpp"
+#include "roki-mb-interface/Protocols/SKServoAdapter.hpp"
 #include "roki-mb-interface/Protocols/ZubrAdapter.hpp"
 
 #include <gtest/gtest.h>
 #include <math.h>
+#include <string>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <unordered_map>
+#include <unordered_set>
 
 #define str(a) #a
 #define xstr(a) str(a)
@@ -30,7 +34,7 @@ using namespace MbInterface;
 
 #define INIT_RCB                                                               \
   INIT_MB;                                                                     \
-  MbProtocols::RokiRcb4 rcb4{mb};                                        \
+  MbProtocols::RokiRcb4 rcb4{mb};                                              \
   ASSERT_TRUE(rcb4.checkAcknowledge()) << rcb4.GetError() << std::endl;
 
 #define RCB_CALL(foo) ASSERT_TRUE(rcb4.foo) << rcb4.GetError() << std::endl;
@@ -40,6 +44,12 @@ using namespace MbInterface;
   MbProtocols::ZubrAdapter zubr{mb};
 
 #define ZUBR_CHECK(ret) ASSERT_TRUE(ret) << zubr.GetError() << std::endl;
+
+#define INIT_SKS                                                               \
+  INIT_MB;                                                                     \
+  MbProtocols::SKServoAdapter sks{mb};
+
+#define SKS_CHECK(ret) ASSERT_TRUE(ret) << sks.GetError() << std::endl;
 
 bool AskPrompt(const std::string &msg) {
   std::cerr << msg << "? [y/n]" << std::endl;
@@ -399,7 +409,49 @@ TEST(Zubr, MemFloat) {
 #endif
 }
 
-TEST(Zubr, MemPython){RPTEST("zubr_mem.py")}
+TEST(Zubr, MemPython) { RPTEST("zubr_mem.py") }
+
+void FindIds(int expectedCount = -1) {
+  std::unordered_map<uint8_t, std::string> errs;
+  std::unordered_map<uint8_t, int16_t> servos;
+
+  auto idmin = StarkitServo::Limits::ServoIdMin;
+  auto idmax = StarkitServo::Limits::ServoIdMax;
+
+  for (int id = idmin; id <= idmax; ++id) {
+    auto ret = sks.GetInfo(id);
+    bool ok = std::get<0>(ret);
+    auto resp = std::get<1>(ret);
+
+    if (ok) {
+      servos[id] = resp.Value;
+      continue;
+    }
+
+    errs[id] = sks.GetError();
+  }
+
+  if (servos.size() != 0) {
+    std::cerr << "Found servos, displaying positions: " << std::endl;
+    for (const auto &iter : servos)
+      std::cerr << "  #" << iter.first << ": " << iter.second << std::endl;
+  }
+
+  std::cerr << "Displaying unsuccessful requests: " << std::endl;
+
+  for (const auto &iter : errs) {
+    std::cerr << "  #" << iter.first << ": " << iter.second << std::endl;
+  }
+
+  if (expectedCount == -1)
+    return;
+
+  ASSERT_EQ(expectedCount, servos.size())
+      << "Some servos did not respond correctly" << std::endl;
+}
+
+TEST(SKServo, FindServos) { FindIds(); }
+TEST(SKServo, FindHeadServos) { FindIds(2); }
 
 #undef MB_CALL
 #undef INIT_MB

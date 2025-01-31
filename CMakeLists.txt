@@ -51,7 +51,7 @@ target_include_directories(MbFactory PUBLIC Inc/)
 
 # Tests
 add_executable(${TEST_EXECUTABLE} Src/MbDiagEntry.cpp)
-target_link_libraries(${TEST_EXECUTABLE} PUBLIC MbFactory ZubrAdapter RokiRcb4Adapter GTest::gtest_main)
+target_link_libraries(${TEST_EXECUTABLE} PUBLIC MbFactory ZubrAdapter RokiRcb4Adapter SKServoAdapter GTest::gtest_main)
 if(DEFINED ENV{ROKI_USE_HARDWARE_MOCKS})
     target_compile_definitions(${TEST_EXECUTABLE} PRIVATE USE_MOCKS)
 endif()
@@ -150,7 +150,7 @@ function(bundle_static_library tgt_name bundled_tgt_name)
 endfunction()
 
 add_library(rokilowlvl-export STATIC Src/CheckDefs.cpp)
-target_link_libraries(rokilowlvl-export PUBLIC MotherboardAdapter ZubrAdapter RokiRcb4Adapter DaemonTools CLI)
+target_link_libraries(rokilowlvl-export PUBLIC MotherboardAdapter ZubrAdapter RokiRcb4Adapter SKServoAdapter DaemonTools CLI)
 
 bundle_static_library(rokilowlvl-export rokilowlvl)
 

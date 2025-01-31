@@ -1,1 +1,1 @@
-SerialInterface.*:MbFactory.*:Motherboard.*:SKServo.*:-Motherboard.GetBodyFrame:Motherboard.TestBodyQueue:Motherboard.BodySendForward:Motherboard.BodySendAsync:Motherboard.BodySendQueue
+SerialInterface.*:MbFactory.*:Motherboard.*:SKServo.*:-Motherboard.GetBodyFrame:Motherboard.TestBodyQueue:Motherboard.BodySendForward:Motherboard.BodySendAsync:Motherboard.BodySendQueue:SKServo.FindServo
