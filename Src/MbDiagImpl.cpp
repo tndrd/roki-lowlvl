@@ -10,8 +10,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <unordered_map>
-#include <unordered_set>
+#include <map>
 
 #define str(a) #a
 #define xstr(a) str(a)
@@ -412,8 +411,10 @@ TEST(Zubr, MemFloat) {
 TEST(Zubr, MemPython) { RPTEST("zubr_mem.py") }
 
 void FindIds(int expectedCount = -1) {
-  std::unordered_map<uint8_t, std::string> errs;
-  std::unordered_map<uint8_t, int16_t> servos;
+  INIT_SKS;
+
+  std::map<uint8_t, std::string> errs;
+  std::map<uint8_t, int16_t> servos;
 
   auto idmin = StarkitServo::Limits::ServoIdMin;
   auto idmax = StarkitServo::Limits::ServoIdMax;
@@ -424,7 +425,7 @@ void FindIds(int expectedCount = -1) {
     auto resp = std::get<1>(ret);
 
     if (ok) {
-      servos[id] = resp.Value;
+      servos[id] = resp.Param1;
       continue;
     }
 
@@ -434,13 +435,13 @@ void FindIds(int expectedCount = -1) {
   if (servos.size() != 0) {
     std::cerr << "Found servos, displaying positions: " << std::endl;
     for (const auto &iter : servos)
-      std::cerr << "  #" << iter.first << ": " << iter.second << std::endl;
+      std::cerr << "  #" << +iter.first << ": " << iter.second << std::endl;
   }
 
   std::cerr << "Displaying unsuccessful requests: " << std::endl;
 
   for (const auto &iter : errs) {
-    std::cerr << "  #" << iter.first << ": " << iter.second << std::endl;
+    std::cerr << "  #" << +iter.first << ": " << iter.second << std::endl;
   }
 
   if (expectedCount == -1)

@@ -78,7 +78,10 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
       .def("set_body_queue_period", &MA::SetBodyQueuePeriod)
       .def("is_ok", &MA::IsOk)
       .def("get_error", &MA::GetError)
-      .def("reset_body_queue", &MA::ResetBodyQueue);
+      .def("reset_body_queue", &MA::ResetBodyQueue)
+      .def("set_body_timeout", &MA::SetBodyTimeout)
+      .def("disable_body_arq", &MA::DisableBodyARQ)
+      .def("reset_body_strobe_callback", &MA::ResetBodyStrobeCallback);
       
    m.def("create_motherboard", &LowLvl::MbFactoryAdapter::CreateAdapter);
 
@@ -119,6 +122,8 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
   rcb4.def("set_servo_stretch", &Rcb4::setServoStretch);
   rcb4.def("read_addr", &Rcb4::moveRamToComCmdSynchronize);
   rcb4.def("motion_play", &Rcb4::motionPlay);
+  rcb4.def("enable_arq", &Rcb4::enableARQ);
+  rcb4.def("enable_strobe_callback", &Rcb4::enableStrobeCallback);
 
   rcb4.def("get_error", &Rcb4::GetError);
   rcb4.def("is_ok", &Rcb4::IsOk);
