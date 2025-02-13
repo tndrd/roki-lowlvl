@@ -64,9 +64,9 @@ install(DIRECTORY Diagnostic/Suites/ DESTINATION ${DIAG_SUITES_DIR})
 pybind11_add_module(${PYTHON_MODULE_NAME} Src/PyBinding.cpp)
 target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC MbFactory RokiRcb4Adapter ZubrAdapter)
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-message(INFO " Python site-packages directory: ${Python3_SITEARCH}")
-install(TARGETS ${PYTHON_MODULE_NAME} DESTINATION ${Python3_SITEARCH})
+execute_process(COMMAND python -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON3_SITEDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+message(INFO " Python site-packages directory: ${PYTHON3_SITEDIR}")
+install(TARGETS ${PYTHON_MODULE_NAME} DESTINATION ${PYTHON3_SITEDIR})
 
 # Bundling library
 
