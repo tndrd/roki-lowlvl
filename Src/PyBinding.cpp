@@ -40,7 +40,8 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
       .def(py::init<>())
       .def_readwrite("first", &MI::FrameContainerInfo::First)
       .def_readwrite("num_av", &MI::FrameContainerInfo::NumAv)
-      .def_readwrite("max_frames", &MI::FrameContainerInfo::MaxFrames);
+      .def_readwrite("max_frames", &MI::FrameContainerInfo::MaxFrames)
+      .def_readwrite("active", &MI::FrameContainerInfo::Active);
 
   py::class_<MI::BodyQueueInfo>(m, "BodyQueueInfo")
       .def(py::init<>())
