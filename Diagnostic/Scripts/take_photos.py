@@ -29,7 +29,9 @@ picam2.stop()
 imu = rpt.call(mb, mb.get_imu_container_info())
 body = rpt.call(mb, mb.get_body_container_info())
 
-if rpt.check(body.num_av == 0):
+if not body.active:
+    rpt.eprint("Warning: body callback is disabled")
+elif rpt.check(body.num_av == 0):
     rpt.failure_stop("No frames in body frCont")
 
 if rpt.check(imu.num_av == 0):

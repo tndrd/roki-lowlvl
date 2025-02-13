@@ -5,12 +5,12 @@
 #include "roki-mb-interface/Protocols/ZubrAdapter.hpp"
 
 #include <gtest/gtest.h>
+#include <map>
 #include <math.h>
 #include <string>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <map>
 
 #define str(a) #a
 #define xstr(a) str(a)
@@ -263,6 +263,9 @@ TEST(Motherboard, GetBodyFrame) {
   BodyResponce responce;
 
   MB_CALL(GetBodyContainerInfo(info));
+  if (!info.Active)
+    return;
+
 #ifndef USE_MOCKS
   ASSERT_GT(info.NumAv, 0) << "Queue empty" << std::endl;
 #endif
@@ -315,11 +318,14 @@ TEST(Motherboard, BodySendQueue) {
   std::array<uint8_t, 4> requestData;
   rcb4.acknowledgeCmd(requestData.data());
 
+  MB_CALL(SetBodyTimeout(5));
   MB_CALL(GetBodyQueueInfo(info));
 
   for (int i = 0; i < info.Capacity; ++i) {
+    std::cerr << i << "/" << +info.Capacity << "...\r";
     MB_CALL(BodySendQueue(requestData.data(), 4, 4));
   }
+  std::cerr << std::endl;
 
 #ifndef USE_MOCKS
   int attempts = 0;
@@ -328,6 +334,30 @@ TEST(Motherboard, BodySendQueue) {
         << "Failed to overflow body queue" << std::endl;
   }
 #endif
+}
+
+TEST(Motherboard, SetBodyTimeout) {
+  {
+    INIT_MB;
+    MB_CALL(SetBodyTimeout(1000));
+    MB_CALL(SetBodyTimeout(20));
+  }
+  RPTEST("set_body_timeout.py");
+}
+
+TEST(Motherboard, BodyARQ) {
+  INIT_MB;
+  uint8_t nack[] = {0xDE, 0xAD, 0xBE, 0xEF};
+  MB_CALL(EnableBodyARQ(nack, sizeof(nack), 42));
+  MB_CALL(DisableBodyARQ());
+}
+
+TEST(Motherboard, BodyStrobeCallback) {
+  INIT_MB;
+
+  uint8_t req[] = {0xDE, 0xAD, 0xBE, 0xEF};
+  MB_CALL(SetBodyStrobeCallback(req, sizeof(req), 42));
+  MB_CALL(ResetBodyStrobeCallback());
 }
 
 TEST(Rcb4, Acknowledge) { INIT_RCB; }
@@ -376,6 +406,24 @@ TEST(Rcb4, ReadRam) {
   RCB_CALL(moveRamToComCmdSynchronize(0x0060, 8, rxData.data()));
 
   ASSERT_NE(rxData, zeroes) << "read resulted in zeroes" << std::endl;
+}
+
+TEST(Rcb4, EnableARQ) {
+  {
+    INIT_RCB;
+    RCB_CALL(enableARQ(42));
+    MB_CALL(DisableBodyARQ());
+  }
+  RPTEST("rcb4_arq.py");
+}
+
+TEST(Rcb4, StrobeCallback) {
+  INIT_RCB;
+
+  RCB_CALL(enableStrobeCallback());
+  MB_CALL(ResetBodyStrobeCallback());
+
+  RPTEST("rcb4_strobe_callback.py");
 }
 
 TEST(Motherboard, TestStrobeFilter) { RPTEST("test_sf.py"); }
