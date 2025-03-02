@@ -462,18 +462,18 @@ void FindIds(int expectedCount = -1) {
   INIT_SKS;
 
   std::map<uint8_t, std::string> errs;
-  std::map<uint8_t, int16_t> servos;
+  std::map<uint8_t, int32_t> servos;
 
   auto idmin = StarkitServo::Limits::ServoIdMin;
   auto idmax = StarkitServo::Limits::ServoIdMax;
 
   for (int id = idmin; id <= idmax; ++id) {
-    auto ret = sks.GetInfo(id);
+    auto ret = sks.GetParam(id, 0);
     bool ok = std::get<0>(ret);
     auto resp = std::get<1>(ret);
 
     if (ok) {
-      servos[id] = resp.Param1;
+      servos[id] = resp.Value;
       continue;
     }
 
@@ -501,6 +501,70 @@ void FindIds(int expectedCount = -1) {
 
 TEST(SKServo, FindServos) { FindIds(); }
 TEST(SKServo, FindHeadServos) { FindIds(2); }
+
+TEST(SKServo, BruteForceCS) {
+  INIT_MB;
+  uint8_t rxBuf[256] = {};
+  uint8_t txBuf[2] = {0x10, 0};
+
+  std::cerr << "Bruteforcing CS..." << std::endl;
+  for (int id = 0; id < 16; ++id)
+    for (int i = 0; i < 256; ++i) {
+      txBuf[0] = (id & 0x0F) | 0x10;
+      std::cerr << std::hex << +txBuf[0] << ": " << +i << "/" << 255 << std::dec
+                << ": ";
+      txBuf[1] = static_cast<uint8_t>(i);
+      bool ok = mb.BodySendForward(txBuf, sizeof(txBuf), rxBuf, 1);
+      if (!ok) {
+        std::cerr << mb.GetError() << "\r";
+        continue;
+      }
+      std::cerr << "Found correct: " << std::hex << +txBuf[0] << " "
+                << +txBuf[1] << std::dec << std::endl;
+      break;
+    }
+}
+
+TEST(SKServo, Sequence) {
+  INIT_MB;
+  uint8_t rxBuf[256] = {};
+  uint8_t txBuf[5] = {0x6b, 0x93, 0x80, 0x80, 0xa5};
+
+  MB_CALL(BodySendForward(txBuf, sizeof(txBuf), rxBuf, 1));
+}
+
+TEST(SKServo, Command) {
+  INIT_SKS;
+
+  auto ret = sks.GetParam(11, 0);
+
+  bool ok = std::get<0>(ret);
+  auto resp = std::get<1>(ret);
+
+  ASSERT_TRUE(ok) << sks.GetError() << std::endl;
+  sleep(1);
+
+  sks.SetParam(11, 500, 0);
+  sleep(1);
+  sks.SetParam(12, 500, 0);
+  sleep(2);
+
+  int amp = 2000;
+  float freq = (6e-2) / 6.14;
+
+  int pos = 0;
+  int x = 0;
+
+  while(1) {
+    sks.SetParam(11, 500, pos);
+
+    pos = int(amp * sin(x * freq));
+
+    x++;
+
+    usleep(1000);
+  }
+}
 
 #undef MB_CALL
 #undef INIT_MB
