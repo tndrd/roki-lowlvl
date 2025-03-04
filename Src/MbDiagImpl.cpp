@@ -456,19 +456,23 @@ TEST(Zubr, MemFloat) {
 #endif
 }
 
-TEST(Zubr, MemPython) { RPTEST("zubr_mem.py") }
+TEST(Zubr, MemPython){RPTEST("zubr_mem.py")}
 
-void FindIds(int expectedCount = -1) {
+std::vector<uint8_t> DummyIds;
+
+void FindIds(int expectedCount = -1, std::vector<uint8_t> &ids = DummyIds) {
   INIT_SKS;
 
   std::map<uint8_t, std::string> errs;
   std::map<uint8_t, int32_t> servos;
 
-  auto idmin = StarkitServo::Limits::ServoIdMin;
-  auto idmax = StarkitServo::Limits::ServoIdMax;
+  using SKS = MbProtocols::SKServoAdapter;
+
+  auto idmin = SKS::Limits::ServoIdMin;
+  auto idmax = SKS::Limits::ServoIdMax;
 
   for (int id = idmin; id <= idmax; ++id) {
-    auto ret = sks.GetParam(id, 0);
+    auto ret = sks.GetParam(id, SKS::Params::Signature);
     bool ok = std::get<0>(ret);
     auto resp = std::get<1>(ret);
 
@@ -481,89 +485,101 @@ void FindIds(int expectedCount = -1) {
   }
 
   if (servos.size() != 0) {
-    std::cerr << "Found servos, displaying positions: " << std::endl;
-    for (const auto &iter : servos)
-      std::cerr << "  #" << +iter.first << ": " << iter.second << std::endl;
-  }
-
-  std::cerr << "Displaying unsuccessful requests: " << std::endl;
-
-  for (const auto &iter : errs) {
-    std::cerr << "  #" << +iter.first << ": " << iter.second << std::endl;
-  }
-
-  if (expectedCount == -1)
-    return;
-
-  ASSERT_EQ(expectedCount, servos.size())
-      << "Some servos did not respond correctly" << std::endl;
-}
-
-TEST(SKServo, FindServos) { FindIds(); }
-TEST(SKServo, FindHeadServos) { FindIds(2); }
-
-TEST(SKServo, BruteForceCS) {
-  INIT_MB;
-  uint8_t rxBuf[256] = {};
-  uint8_t txBuf[2] = {0x10, 0};
-
-  std::cerr << "Bruteforcing CS..." << std::endl;
-  for (int id = 0; id < 16; ++id)
-    for (int i = 0; i < 256; ++i) {
-      txBuf[0] = (id & 0x0F) | 0x10;
-      std::cerr << std::hex << +txBuf[0] << ": " << +i << "/" << 255 << std::dec
-                << ": ";
-      txBuf[1] = static_cast<uint8_t>(i);
-      bool ok = mb.BodySendForward(txBuf, sizeof(txBuf), rxBuf, 1);
-      if (!ok) {
-        std::cerr << mb.GetError() << "\r";
-        continue;
-      }
-      std::cerr << "Found correct: " << std::hex << +txBuf[0] << " "
-                << +txBuf[1] << std::dec << std::endl;
-      break;
+    std::cerr << "Found servos, displaying signatures: " << std::endl;
+    for (const auto &iter : servos) {
+      auto sign = iter.second;
+      std::cerr << "  #" << +iter.first << ": "
+                << StarkitServo::Signatures::ToStr(sign) << " [" << +sign << "]"
+                << std::endl;
     }
+  }
+
+  if (expectedCount != servos.size()) {
+
+    std::cerr << "Displaying unsuccessful requests: " << std::endl;
+
+    for (const auto &iter : errs) {
+      std::cerr << "  #" << +iter.first << ": " << iter.second << std::endl;
+    }
+  }
+
+  if (expectedCount != -1)
+    ASSERT_EQ(expectedCount, servos.size())
+        << "Some servos did not respond correctly" << std::endl;
+
+  ids = std::vector<uint8_t>(servos.size(), 0);
+
+  int i = 0;
+  for (const auto &iter : servos)
+    ids[i++] = iter.first;
 }
 
-TEST(SKServo, Sequence) {
-  INIT_MB;
-  uint8_t rxBuf[256] = {};
-  uint8_t txBuf[5] = {0x6b, 0x93, 0x80, 0x80, 0xa5};
+TEST(SKServoUtils, FindServos) { FindIds(); }
+TEST(SKServoHead, FindServos) { FindIds(2); }
 
-  MB_CALL(BodySendForward(txBuf, sizeof(txBuf), rxBuf, 1));
-}
+TEST(SKServo, SetPosition) {
+  const size_t DurationMs = 2000;
 
-TEST(SKServo, Command) {
+  std::vector<uint8_t> ids;
+  FindIds(2, ids);
+
   INIT_SKS;
 
-  auto ret = sks.GetParam(11, 0);
+  std::cerr << "Running for ~" << DurationMs / 1000 << "s..." << std::endl;
 
-  bool ok = std::get<0>(ret);
-  auto resp = std::get<1>(ret);
+  ASSERT_FALSE(ids.empty());
 
-  ASSERT_TRUE(ok) << sks.GetError() << std::endl;
-  sleep(1);
-
-  sks.SetParam(11, 500, 0);
-  sleep(1);
-  sks.SetParam(12, 500, 0);
-  sleep(2);
-
-  int amp = 2000;
-  float freq = (6e-2) / 6.14;
+  int amp = 1000;
+  float freq = (6e-2) / 6.28;
 
   int pos = 0;
   int x = 0;
 
-  while(1) {
-    sks.SetParam(11, 500, pos);
+  while (x < DurationMs) {
+    for (uint8_t id : ids)
+      SKS_CHECK(std::get<0>(sks.SetPosition(id, pos)));
 
     pos = int(amp * sin(x * freq));
-
     x++;
+
+    if (x == DurationMs - 1) // Last Iteration
+      pos = 0;
 
     usleep(1000);
   }
+
+  sleep(1);
+  for (uint8_t id : ids)
+    SKS_CHECK(std::get<0>(sks.SetFree(id)));
+}
+
+TEST(SKServo, SetGetParam) {
+  std::vector<uint8_t> ids;
+  FindIds(2, ids);
+
+  INIT_SKS;
+
+  using SKS = MbProtocols::SKServo;
+
+  ASSERT_FALSE(ids.empty());
+
+  for (uint8_t id : ids)
+    SKS_CHECK(std::get<0>(sks.SetParam(id, SKS::Params::Servo::TargetVal, 0)));
+
+  sleep(1);
+
+  for (uint8_t id : ids) {
+    auto ret = sks.GetParam(id, SKS::Params::Servo::TargetVal);
+    SKS_CHECK(std::get<0>(ret));
+    EXPECT_EQ(std::get<1>(ret).Value, 0);
+  }
+
+  for (uint8_t id : ids)
+    SKS_CHECK(std::get<0>(sks.SetFree(id)));
+}
+
+TEST(SKServo, Binding) {
+  RPTEST("skservo.py")
 }
 
 #undef MB_CALL
