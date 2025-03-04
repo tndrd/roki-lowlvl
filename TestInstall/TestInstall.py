@@ -69,7 +69,32 @@ zubr = roki.protocols.Zubr(mb)
 zubr.mem_i_set(0, 0)
 zubr.mem_f_set(0, 0)
 zubr.mem_i_get(0)
-zubr.mem_f_get(0)
+zubr.mem_f_get(0)\
+
+
+rsp = roki.protocols.SKServo.SetPosRsp()
+_ = rsp.value
+_ = rsp.torque
+
+rsp = roki.protocols.SKServo.GetParamRsp()
+_ = rsp.value
+
+rsp = roki.protocols.SKServo.SetParamRsp()
+_ = rsp.value
+
+params = roki.protocols.SKServo.Params
+_ = params.SIGNATURE
+_ = params.SERVO_TARGET_VAL
+
+sks = roki.protocols.SKServo(mb)
+sks.set_position(0, 0)
+sks.set_free(0)
+sks.set_hold(0)
+sks.set_soft(0)
+sks.get_param(0, 0)
+sks.set_param(0, 0, 0)
+sks.is_ok()
+sks.get_error()
 
 try:
     mb = roki.create_motherboard()
