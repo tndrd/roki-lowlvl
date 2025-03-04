@@ -51,7 +51,7 @@ target_include_directories(MbFactory PUBLIC Inc/)
 
 # Tests
 add_executable(${TEST_EXECUTABLE} Src/MbDiagEntry.cpp)
-target_link_libraries(${TEST_EXECUTABLE} PUBLIC MbFactory ZubrAdapter RokiRcb4Adapter SKServoAdapter GTest::gtest_main)
+target_link_libraries(${TEST_EXECUTABLE} PUBLIC MbFactory ZubrAdapter RokiRcb4Adapter SKServoAdapter GTest::gtest_main SKSUtils)
 if(DEFINED ENV{ROKI_USE_HARDWARE_MOCKS})
     target_compile_definitions(${TEST_EXECUTABLE} PRIVATE USE_MOCKS)
 endif()
@@ -62,7 +62,7 @@ install(DIRECTORY Diagnostic/Suites/ DESTINATION ${DIAG_SUITES_DIR})
 
 # Bindings
 pybind11_add_module(${PYTHON_MODULE_NAME} Src/PyBinding.cpp)
-target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC MbFactory RokiRcb4Adapter ZubrAdapter)
+target_link_libraries(${PYTHON_MODULE_NAME} PUBLIC MbFactory RokiRcb4Adapter ZubrAdapter SKServoAdapter)
 
 execute_process(COMMAND python3 -c "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PYTHON3_SITEDIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 message(INFO " Python site-packages directory: ${PYTHON3_SITEDIR}")

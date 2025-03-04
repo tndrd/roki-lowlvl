@@ -4,6 +4,7 @@
 #include "roki-lowlvl/MbFactory.hpp"
 #include "roki-mb-interface/MotherboardAdapter.hpp"
 #include "roki-mb-interface/Protocols/RokiRcb4Adapter.hpp"
+#include "roki-mb-interface/Protocols/SKServoAdapter.hpp"
 #include "roki-mb-interface/Protocols/ZubrAdapter.hpp"
 
 #define str(a) #a
@@ -83,8 +84,8 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
       .def("set_body_timeout", &MA::SetBodyTimeout)
       .def("disable_body_arq", &MA::DisableBodyARQ)
       .def("reset_body_strobe_callback", &MA::ResetBodyStrobeCallback);
-      
-   m.def("create_motherboard", &LowLvl::MbFactoryAdapter::CreateAdapter);
+
+  m.def("create_motherboard", &LowLvl::MbFactoryAdapter::CreateAdapter);
 
   /* Protocols */
 
@@ -114,8 +115,8 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
   rcb4.def("set_free_single_servo", &Rcb4::setFreeSingleServo);
   rcb4.def("set_hold_single_servo", &Rcb4::setHoldSingleServo);
   rcb4.def("set_servo_pos", &Rcb4::setServoPos);
-  rcb4.def("set_servo_pos_async", &Rcb4::setServoPosAsync, py::arg("servo_data"),
-           py::arg("frames"), py::arg("pause") = 0);
+  rcb4.def("set_servo_pos_async", &Rcb4::setServoPosAsync,
+           py::arg("servo_data"), py::arg("frames"), py::arg("pause") = 0);
   rcb4.def("set_free_pos", &Rcb4::setFreePos);
   rcb4.def("set_hold_pos", &Rcb4::setHoldPos);
   rcb4.def("get_single_pos", &Rcb4::getSinglePos);
@@ -139,4 +140,37 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
   zubr.def("mem_f_get", &Zubr::MemFGet);
   zubr.def("is_ok", &Zubr::IsOk);
   zubr.def("get_error", &Zubr::GetError);
+
+  using SKS = MbProtocols::SKServoAdapter;
+  using SKSProc = SKS::Procedures;
+  py::class_<SKS> sks(pModule, "SKServo");
+
+  py::class_<SKSProc::Control::Responce>(sks, "SetPosRsp")
+      .def(py::init<>())
+      .def_readwrite("value", &SKSProc::Control::Responce::Value)
+      .def_readwrite("torque", &SKSProc::Control::Responce::Torque);
+
+  py::class_<SKSProc::Read::Responce>(sks, "GetParamRsp")
+      .def(py::init<>())
+      .def_readwrite("value", &SKSProc::Read::Responce::Value);
+
+  py::class_<SKSProc::Write::Responce>(sks, "SetParamRsp")
+      .def(py::init<>())
+      .def_readwrite("value", &SKSProc::Write::Responce::Value);
+
+  py::class_<SKS::Params>(sks, "Params")
+      .def_property_readonly_static("SIGNATURE",
+                                    [](py::object) { return SKS::Params::Signature; })
+      .def_property_readonly_static(
+          "SERVO_TARGET_VAL", [](py::object) { return SKS::Params::Servo::TargetVal; });
+
+  sks.def(py::init<MI::MotherboardAdapter &>());
+  sks.def("set_position", &SKS::SetPosition);
+  sks.def("set_free", &SKS::SetFree);
+  sks.def("set_hold", &SKS::SetHold);
+  sks.def("set_soft", &SKS::SetSoft);
+  sks.def("get_param", &SKS::GetParam);
+  sks.def("set_param", &SKS::SetParam);
+  sks.def("is_ok", &SKS::IsOk);
+  sks.def("get_error", &SKS::GetError);
 }
