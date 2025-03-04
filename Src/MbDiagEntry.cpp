@@ -1,6 +1,7 @@
 #include "roki-lowlvl/MbFactory.hpp"
 #include "roki-mb-daemon/Helpers.hpp"
 #include "gtest/gtest.h"
+#include <cassert>
 #include <cstring>
 #include <functional>
 #include <glob.h>
@@ -16,7 +17,6 @@ using namespace std::string_literals;
 #define XSTR(x) STR(x)
 
 #define DIAG_SUITES_PATH XSTR(DIAG_SUITES_DIR)
-
 
 void PreDiagnosticRoutine() try {
   auto mb = LowLvl::MbFactory::Create(PREDIAG_NAME);
@@ -73,7 +73,11 @@ void PrintHelp() {
 
 std::string LoadSuite(const std::string &suitename) {
   std::ifstream strm;
-  strm.open(DIAG_SUITES_PATH "/" + suitename + ".suite");
+  std::string path = DIAG_SUITES_PATH "/" + suitename + ".suite";
+  strm.open(path);
+
+  if (strm.fail())
+    throw MbDaemon::Helpers::ErrnoException("Failed to open " + path, errno);
 
   char c = 0;
   strm >> c;
@@ -98,8 +102,7 @@ int main(int argc, char *argv[]) try {
 
   auto pattern = LoadSuite(argv[1]);
 
-  std::string arg =
-      "--gtest_filter=" + pattern;
+  std::string arg = "--gtest_filter=" + pattern;
 
   argv[1] = &arg[0];
 
