@@ -1,3 +1,4 @@
 .vscode/
 build/
 TestInstall/build/
+Diagnostic/Suites/debug.suite
