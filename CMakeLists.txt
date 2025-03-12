@@ -31,6 +31,8 @@ add_compile_definitions(DIAG_SCRIPTS_DIR=${DIAG_SCRIPTS_DIR})
 set(DIAG_SUITES_DIR /usr/lib/${MODULE_NAME}/diagnostic/Suites)
 add_compile_definitions(DIAG_SUITES_DIR=${DIAG_SUITES_DIR})
 
+set(ROKI_PARAM_DIR /usr/local/etc/${MODULE_NAME})
+
 # Required to build shared python library
 add_compile_options(-fPIC -g)
 
@@ -59,6 +61,10 @@ endif()
 install(TARGETS ${TEST_EXECUTABLE} RUNTIME DESTINATION /usr/bin/)
 install(DIRECTORY Diagnostic/Scripts/ DESTINATION ${DIAG_SCRIPTS_DIR})
 install(DIRECTORY Diagnostic/Suites/ DESTINATION ${DIAG_SUITES_DIR})
+install(FILES Misc/default-params.sh DESTINATION ${ROKI_PARAM_DIR})
+
+message(INFO " Roki params dir: ${ROKI_PARAM_DIR}")
+file(WRITE build/paramscmd.txt "source ${ROKI_PARAM_DIR}/default-params.sh\n")
 
 # Bindings
 pybind11_add_module(${PYTHON_MODULE_NAME} Src/PyBinding.cpp)

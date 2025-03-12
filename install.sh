@@ -22,7 +22,15 @@ cmake --build .
 
 echo "\nInstalling...\n"
 
-cmake --install .
+sudo cmake --install .
+
+if [ -z ${ROKI_PARAMS_SET+x} ]; then 
+  echo "Roki parameters not yet set, setting with:"
+  cat paramscmd.txt
+  cat paramscmd.txt >> ~/.bashrc
+else 
+  echo "Roki parameters already installed, skipping .bashrc modification"
+fi
 
 cd ../TestInstall
 sh run.sh
