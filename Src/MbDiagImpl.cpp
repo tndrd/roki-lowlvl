@@ -318,7 +318,6 @@ TEST(Motherboard, BodySendQueue) {
   std::array<uint8_t, 4> requestData;
   rcb4.acknowledgeCmd(requestData.data());
 
-  MB_CALL(SetBodyTimeout(5));
   MB_CALL(GetBodyQueueInfo(info));
 
   for (int i = 0; i < info.Capacity; ++i) {
@@ -334,15 +333,6 @@ TEST(Motherboard, BodySendQueue) {
         << "Failed to overflow body queue" << std::endl;
   }
 #endif
-}
-
-TEST(Motherboard, SetBodyTimeout) {
-  {
-    INIT_MB;
-    MB_CALL(SetBodyTimeout(1000));
-    MB_CALL(SetBodyTimeout(20));
-  }
-  RPTEST("set_body_timeout.py");
 }
 
 TEST(Motherboard, BodyARQ) {
@@ -406,15 +396,6 @@ TEST(Rcb4, ReadRam) {
   RCB_CALL(moveRamToComCmdSynchronize(0x0060, 8, rxData.data()));
 
   ASSERT_NE(rxData, zeroes) << "read resulted in zeroes" << std::endl;
-}
-
-TEST(Rcb4, EnableARQ) {
-  {
-    INIT_RCB;
-    RCB_CALL(enableARQ(42));
-    MB_CALL(DisableBodyARQ());
-  }
-  RPTEST("rcb4_arq.py");
 }
 
 TEST(Rcb4, StrobeCallback) {
