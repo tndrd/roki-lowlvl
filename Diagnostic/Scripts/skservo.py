@@ -11,6 +11,7 @@ DURATION_MS = 2000
 
 mb = rpt.create_motherboard()
 sks = roki.protocols.SKServo(mb)
+sks.set_up_uart()
 
 ids = []
 

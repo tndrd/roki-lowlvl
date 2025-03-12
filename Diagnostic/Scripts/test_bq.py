@@ -36,6 +36,7 @@ def test_bq_period(period, pause = 0, TestReset = False):
     mb = rpt.create_motherboard()
 
     rcb = roki.protocols.Rcb4(mb)
+    rpt.call(rcb, rcb.set_up_uart())
     rpt.call(rcb, rcb.check_acknowledge())
 
     count = rpt.call(mb, mb.get_body_queue_info()).capacity

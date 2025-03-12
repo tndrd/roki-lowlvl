@@ -123,6 +123,7 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
   rcb4.def("read_addr", &Rcb4::moveRamToComCmdSynchronize);
   rcb4.def("motion_play", &Rcb4::motionPlay);
   rcb4.def("enable_strobe_callback", &Rcb4::enableStrobeCallback);
+  rcb4.def("set_up_uart", &Rcb4::setUpUart);
 
   rcb4.def("get_error", &Rcb4::GetError);
   rcb4.def("is_ok", &Rcb4::IsOk);
@@ -170,4 +171,5 @@ PYBIND11_MODULE(PYTHON_MODULE_NAME, m) {
   sks.def("set_param", &SKS::SetParam);
   sks.def("is_ok", &SKS::IsOk);
   sks.def("get_error", &SKS::GetError);
+  sks.def("set_up_uart", &SKS::SetUpUart);
 }

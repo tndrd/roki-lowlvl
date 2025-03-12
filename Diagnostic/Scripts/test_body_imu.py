@@ -11,6 +11,7 @@ ROUND_DIGITS = 2
 mb = rpt.create_motherboard()
 
 rcb = roki.protocols.Rcb4(mb)
+rpt.call(rcb, rcb.set_up_uart())
 rpt.call(rcb, rcb.check_acknowledge())
 
 rpt.eprint(f"Running for {TESTING_TIME_S}s...")

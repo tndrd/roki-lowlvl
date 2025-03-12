@@ -34,6 +34,7 @@ using namespace MbInterface;
 #define INIT_RCB                                                               \
   INIT_MB;                                                                     \
   MbProtocols::RokiRcb4 rcb4{mb};                                              \
+  ASSERT_TRUE(rcb4.setUpUart()) << rcb4.GetError() << std::endl;               \
   ASSERT_TRUE(rcb4.checkAcknowledge()) << rcb4.GetError() << std::endl;
 
 #define RCB_CALL(foo) ASSERT_TRUE(rcb4.foo) << rcb4.GetError() << std::endl;
@@ -46,7 +47,8 @@ using namespace MbInterface;
 
 #define INIT_SKS                                                               \
   INIT_MB;                                                                     \
-  MbProtocols::SKServoAdapter sks{mb};
+  MbProtocols::SKServoAdapter sks{mb};                                         \
+  ASSERT_TRUE(sks.SetUpUart()) << sks.GetError() << std::endl;
 
 #define SKS_CHECK(ret) ASSERT_TRUE(ret) << sks.GetError() << std::endl;
 
@@ -559,9 +561,7 @@ TEST(SKServo, SetGetParam) {
     SKS_CHECK(std::get<0>(sks.SetFree(id)));
 }
 
-TEST(SKServo, Binding) {
-  RPTEST("skservo.py")
-}
+TEST(SKServo, Binding) { RPTEST("skservo.py") }
 
 #undef MB_CALL
 #undef INIT_MB

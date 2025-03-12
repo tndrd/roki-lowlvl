@@ -55,6 +55,7 @@ _ = sd.sio
 _ = sd.data
 
 rcb = roki.protocols.Rcb4(mb)
+rcb.set_up_uart()
 rcb.check_acknowledge()
 rcb.set_servo_pos([], 0)
 
